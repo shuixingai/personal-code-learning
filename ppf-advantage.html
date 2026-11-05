@@ -115,6 +115,7 @@
   .status td.n{font-variant-numeric:tabular-nums;color:var(--dark)}
   .tag-win{color:var(--teal);font-weight:600}
   .tag-lose{color:var(--faint)}
+  .tag-ext{color:var(--teal);opacity:.6}
   .verdict{
     margin-top:10px;font-size:12.5px;color:var(--muted);line-height:1.6;
     background:var(--soft);border-radius:6px;padding:9px 11px;
@@ -178,7 +179,7 @@
   <p class="sub">横轴是「经典不可模拟性 κ」，纵轴是「训练成本的对数」。每个范式一条生产可能性边界（技术），任务偏好一族无差异线（效用），量子优势就是这两者的<b>位置关系</b>，而不是一句口号。</p>
 
   <div class="takeaway">
-    最先要澄清的一件事：你画的那条线是 <b>PPF（技术约束）</b>，不是无差异曲线（偏好）。PPF 里不含任何效用信息，所以单看它无法判断「值不值」；只有把无差异线叠上来，优势才变成一个可判定的区域。<b>这两个身份你之前画在了同一条线上。</b>
+    最先要澄清的一件事：你画的那条线是 <b>PPF（技术约束）</b>，不是无差异曲线（偏好）。PPF 里不含任何效用信息，所以单看它无法判断「值不值」；只有把无差异线叠上来，优势才变成一个可判定的区域。<b>这两个身份很容易被画在同一条线上。</b>
   </div>
 
   <div class="sec-label">01　先把两个对象分开</div>
@@ -306,7 +307,7 @@
       <dt>坐标</dt>
       <dd>横轴 <code>κ</code>：<code>T_sim(n) ~ poly(n)·2^(κn)</code>，κ=0 为 Clifford/浅层，κ→1 为随机电路级。纵轴 <code>y = −log₁₀(训练成本)</code>，barren plateau 下 <code>shots ~ 2^(n/2)</code> ⇒ <code>y ~ −n/2</code>。</dd>
       <dt>玩具参数</dt>
-      <dd>y<sub>B</sub>=3.9，y<sub>LLM</sub>=4.45；QNN <code>y=2.8−3.4κ</code>（κ≤0.78）；QRC <code>y=3.3−0.55κ</code>（κ≤0.62）。<b>示意，非实测</b>——斜率比为「小一个量级」，只用于展示几何关系。</dd>
+      <dd>y<sub>B</sub>=3.9，y<sub>LLM</sub>=4.45；QNN <code>y=2.8−3.4κ</code>（实线 κ≤0.78，虚线外推至 0.97，仅示趋势）；QRC <code>y=3.3−0.55κ</code>（κ≤0.62）。<b>示意，非实测</b>——斜率比为「小一个量级」，只用于展示几何关系。交点落在虚线外推段时表格标「外推」，不计为可信占优。</dd>
       <dt>为什么是直线</dt>
       <dd>纵轴已经取了对数，所以「指数换指数」在这个坐标下退化为斜率 O(1) 的直线；线性坐标下才看到俯冲（见左下小图）。这一点如果不说清，很容易误读成「成本只是线性下降」。</dd>
       <dt>偏好取线性</dt>
@@ -419,8 +420,8 @@ function chartSVG(a){
   /* κ_read 截断线 */
   g += '<line x1="'+X(kr)+'" y1="'+BOX.b+'" x2="'+X(kr)+'" y2="'+Y(4.35)+'" stroke="#C0392B" stroke-width="1.6" stroke-dasharray="5 4"/>';
   g += '<text x="'+(X(kr)+9)+'" y="'+(Y(4.35)-2)+'" font-size="12.5" font-weight="700" fill="#C0392B">κ_read 截断</text>';
-  g += '<text x="'+(X(kr)+8)+'" y="'+(Y(4.35)+14)+'" font-size="11" fill="#8B97A8">线性读出上限</text>';
-  g += '<text x="'+(BOX.r-8)+'" y="'+(Y(-1.18))+'" text-anchor="end" font-size="11.5" fill="#8B97A8">读不出的高阶关联（死表达性）</text>';
+  g += '<text x="'+(X(kr)+8)+'" y="'+(Y(4.35)+14)+'" font-size="11" fill="#8B97A8">QRC 线性读出上限</text>';
+  g += '<text x="'+(BOX.r-8)+'" y="'+(Y(-1.18))+'" text-anchor="end" font-size="11.5" fill="#8B97A8">QRC 读不出的高阶关联（死表达性）</text>';
 
   /* 无差异线 */
   const yEnd = Math.max(yl(1), BOX.ymin);
@@ -463,6 +464,10 @@ function chartSVG(a){
   if (kq !== null && kq <= CFG.qnn.end){
     g += '<circle cx="'+X(kq)+'" cy="'+Y(qnnAt(kq))+'" r="5.5" fill="#fff" stroke="#C0392B" stroke-width="2.4"/>';
     g += '<text x="'+X(kq)+'" y="'+(Y(qnnAt(kq))+24)+'" text-anchor="middle" font-size="11.5" font-weight="700" fill="#C0392B">κ*='+f2(kq)+'</text>';
+  }
+  if (kq !== null && kq > CFG.qnn.end && kq <= 0.97){
+    g += '<circle cx="'+X(kq)+'" cy="'+Y(qnnAt(kq))+'" r="4" fill="#fff" stroke="#C0392B" stroke-width="1.8" opacity="0.8"/>';
+    g += '<text x="'+X(kq)+'" y="'+(Y(qnnAt(kq))+20)+'" text-anchor="middle" font-size="10.5" font-weight="700" fill="#C0392B" opacity="0.8">外推 κ*='+f2(kq)+'</text>';
   }
   if (kc !== null && kc <= CFG.qrc.end){
     g += '<circle cx="'+X(kc)+'" cy="'+Y(qrcAt(kc))+'" r="5.5" fill="#fff" stroke="#C0392B" stroke-width="2.4"/>';
@@ -511,9 +516,10 @@ function insetSVG(){
     q1 += (i ? ' L ' : 'M ') + x(k).toFixed(1) + ' ' + y(Math.pow(10, (CFG.qrc.y0 - CFG.qrc.s * k) - CFG.yB)).toFixed(1);
   }
   g += '<path d="'+q1+'" fill="none" stroke="#137F76" stroke-width="2.6"/>';
-  g += '<line x1="'+x(0.62)+'" y1="'+y(0.1135)+'" x2="'+x(0.62)+'" y2="'+Bm+'" stroke="#C0392B" stroke-width="1.4" stroke-dasharray="4 3"/>';
-  g += '<text x="'+(x(0.62)+6)+'" y="'+(y(0.1135)-6)+'" font-size="10.5" font-weight="700" fill="#C0392B">κ_read</text>';
-  g += '<text x="'+(x(0.62)+6)+'" y="'+(y(0.1135)+7)+'" font-size="9.5" fill="#8B97A8">截断</text>';
+  const tRead = Math.pow(10, (CFG.qrc.y0 - CFG.qrc.s * CFG.kread) - CFG.yB);
+  g += '<line x1="'+x(CFG.kread)+'" y1="'+y(tRead)+'" x2="'+x(CFG.kread)+'" y2="'+Bm+'" stroke="#C0392B" stroke-width="1.4" stroke-dasharray="4 3"/>';
+  g += '<text x="'+(x(CFG.kread)+6)+'" y="'+(y(tRead)-6)+'" font-size="10.5" font-weight="700" fill="#C0392B">κ_read</text>';
+  g += '<text x="'+(x(CFG.kread)+6)+'" y="'+(y(tRead)+7)+'" font-size="9.5" fill="#8B97A8">截断</text>';
 
   /* QNN 曲线 */
   let q2 = '';
@@ -557,12 +563,15 @@ function update(a){
   const kq = crossK(a, CFG.qnn.y0, CFG.qnn.s);
   const kc = crossK(a, CFG.qrc.y0, CFG.qrc.s);
 
+  const QNN_EXT = 0.97;
   const qnnWin = (kq !== null && kq <= CFG.qnn.end) ? [kq, CFG.qnn.end] : null;
+  const qnnExt = (kq !== null && !qnnWin && kq <= QNN_EXT) ? [kq, QNN_EXT] : null;
   const qrcWin = (kc !== null && kc <= CFG.qrc.end) ? [kc, CFG.qrc.end] : null;
 
   document.getElementById('qnnK').textContent = kq === null ? '—' : f2(kq);
-  document.getElementById('qnnW').textContent = qnnWin ? '[' + f2(qnnWin[0]) + ', ' + f2(qnnWin[1]) + ']' : '无';
-  document.getElementById('qnnW').className = qnnWin ? 'tag-win' : 'tag-lose';
+  document.getElementById('qnnW').textContent = qnnWin ? '[' + f2(qnnWin[0]) + ', ' + f2(qnnWin[1]) + ']'
+    : (qnnExt ? '[' + f2(qnnExt[0]) + ', ' + f2(qnnExt[1]) + '] 外推段' : '无');
+  document.getElementById('qnnW').className = qnnWin ? 'tag-win' : (qnnExt ? 'tag-ext' : 'tag-lose');
 
   document.getElementById('qrcK').textContent = kc === null ? '—' : f2(kc);
   document.getElementById('qrcW').textContent = qrcWin ? '[' + f2(qrcWin[0]) + ', ' + f2(qrcWin[1]) + ']' : '无';
@@ -570,11 +579,15 @@ function update(a){
 
   let v;
   if (qnnWin && qrcWin){
-    v = '两条曲线都越过了无差异线，但 QRC 的入口（κ=' + f2(qrcWin[0]) + '）比 QNN（κ=' + f2(qnnWin[0]) + '）更靠左：同样的 α，储层范式更早占优。';
+    v = '两条曲线都越过了无差异线：QRC 入口（κ=' + f2(qrcWin[0]) + '）比 QNN（κ=' + f2(qnnWin[0]) + '）更靠左、更早占优；但 QNN 占优段延伸更远（至 ' + f2(qnnWin[1]) + '，QRC 止于 ' + f2(qrcWin[1]) + '）——高 α 任务里最终胜出的恰是深 QNN 路线。';
+  } else if (qrcWin && qnnExt){
+    v = 'QNN 只在虚线外推段（κ=' + f2(qnnExt[0]) + ' 起）越线：y 已深度为负、实用效价趋零；QRC 自 κ=' + f2(qrcWin[0]) + ' 起便切进优势区。这个窗口正是「深 QNN 勉强越线」与「储层范式中段占优」的分界。';
   } else if (qrcWin && !qnnWin){
-    v = '只有 QRC 在 κ=' + f2(qrcWin[0]) + ' 处切进优势区，QNN 全程压在线下方 —— 这正是「中等 α 的实用任务里，变分范式交不进优势区」的几何版本。';
+    v = '只有 QRC 在 κ=' + f2(qrcWin[0]) + ' 处切进优势区，QNN 在已建模范围内压在线下方 —— 这正是「中等 α 的实用任务里，变分范式交不进优势区」的几何版本。';
   } else if (!qrcWin && qnnWin){
     v = '只有 QNN 越线（κ=' + f2(qnnWin[0]) + ' 起）：纯 κ 驱动的采样类任务的极端情形。';
+  } else if (!qrcWin && qnnExt){
+    v = 'QNN 仅在虚线外推段（κ=' + f2(qnnExt[0]) + ' 起）越线，QRC 全程在线下：极端 α 的情形，且越线处 y 已深度为负。';
   } else {
     v = '这一 α 下没有量子方案占优：不可模拟性带来的增益盖不住可训练性赤字，理性选择是留在经典竖线上。';
   }
@@ -603,14 +616,3 @@ function init(){
 if (typeof document !== 'undefined' && typeof window !== 'undefined'){
   if (document.readyState === 'loading'){
     document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
-}
-
-if (typeof module !== 'undefined' && module.exports){
-  module.exports = { chartSVG: chartSVG, insetSVG: insetSVG };
-}
-</script>
-</body>
-</html>
