@@ -616,3 +616,10 @@ function init(){
 if (typeof document !== 'undefined' && typeof window !== 'undefined'){
   if (document.readyState === 'loading'){
     document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+}
+</script>
+</body>
+</html>
